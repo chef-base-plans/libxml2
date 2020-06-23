@@ -60,7 +60,7 @@ control 'core-plans-libxml2' do
     its('exit_status') { should eq 0 }
   end
 
-  xmllint_works = command("#{File.join(target_dir, "xmllint)} --version")
+  xmllint_works = command("#{File.join(target_dir, "xmllint")} --version")
   describe xmllint_works do
     its('stdout') { should be_empty }
     its('stderr') { should match /\/bin\/xmllint: using libxml version [0-9]+/ }
