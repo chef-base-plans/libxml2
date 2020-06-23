@@ -9,7 +9,11 @@ control 'core-plans-libxml2' do
   impact 1.0
   title 'Ensure libxml2 binary is working as expected'
   desc '
-  We first check that the libxml2 binary we expect is present and then run version checks on both to verify that it is excecutable.
+  To test the binaries that libxml2 provides we first check for the installation directory.
+  Using this directory we then run checks to ensure the binary exists.
+  Then we test that the version of the binary we expect to be installed exists or another similar simple test
+    $ $PKG_PATH/bin/xml2-config --version
+      2.9.10
   '
 
   hab_pkg_path = command("hab pkg path #{plan_ident}")
@@ -28,9 +32,9 @@ control 'core-plans-libxml2' do
     its('exit_status') { should eq 0 }
   end
 
-  xml2_config_works = command("/bin/xml2-config --version")
+  xml2_config_works = command("#{File.join(target_dir, "xml2-config")} --version")
   describe xml2_config_works do
-    its('stdout') { should match /[0-9]+.[0-9]+.[0-9]+/ }
+    its('stdout') { should match /#{hab_pkg_path.stdout.strip.split('/')[5]}/ }
     its('stderr') { should be_empty }
     its('exit_status') { should eq 0 }
   end
@@ -42,9 +46,9 @@ control 'core-plans-libxml2' do
     its('exit_status') { should eq 0 }
   end
 
-  xmlcatalog_works = command("/bin/xmlcatalog -v")
+  xmlcatalog_works = command("#{File.join(target_dir, "xmlcatalog")} --create")
   describe xmlcatalog_works do
-    its('stdout') { should be_empty }
+    its('stdout') { should match /DTD Entity Resolution XML Catalog V1.0/ }
     its('stderr') { should be_empty }
     its('exit_status') { should eq 0 }
   end
@@ -56,10 +60,11 @@ control 'core-plans-libxml2' do
     its('exit_status') { should eq 0 }
   end
 
-  xmllint_works = command("/bin/xmllint --version")
+  xmllint_works = command("#{File.join(target_dir, "xmllint")} --version")
   describe xmllint_works do
     its('stdout') { should be_empty }
     its('stderr') { should match /\/bin\/xmllint: using libxml version [0-9]+/ }
     its('exit_status') { should eq 0 }
   end
+
 end
